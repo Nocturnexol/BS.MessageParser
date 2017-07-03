@@ -61,6 +61,10 @@
         }
     });
 
+    $('#msg').mouseover(function() {
+        $(this).focus().select();
+    });
+
     $('#clear').click(function() {
         $('#content').html('');
         $('#msg').val('');
