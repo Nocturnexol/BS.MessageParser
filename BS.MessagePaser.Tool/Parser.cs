@@ -152,6 +152,11 @@ namespace BS.MessageParser.Tool
                         Structs.Struct0308 obj = ConverTo0308(msg_data);
                         res = GetStructVal(obj);
                     }
+                    else if (msg_type == "030A")
+                    {
+                        Structs.Struct030A obj = ConverTo030A(msg_data);
+                        res = GetStructVal(obj);
+                    }
                     else if (msg_type == "030B")//切换线路应答
                     {
                         Structs.Struct030B obj = ConverTo030B(msg_data);
@@ -160,6 +165,11 @@ namespace BS.MessageParser.Tool
                     else if (msg_type == "0314")//手动报警
                     {
                         Structs.Struct0314 obj = ConverTo0314(msg_data);
+                        res = GetStructVal(obj);
+                    }
+                    else if (msg_type == "0317")
+                    {
+                        Structs.Struct0317 obj = ConverTo0317(msg_data);
                         res = GetStructVal(obj);
                     }
                     else if (msg_type == "0318")//发送实时计划应答
@@ -172,9 +182,19 @@ namespace BS.MessageParser.Tool
                         Structs.Struct0321 obj = ConverTo0321(msg_data);
                         res = GetStructVal(obj);
                     }
+                    else if (msg_type == "0322")
+                    {
+                        Structs.Struct0322 obj = ConverTo0322(msg_data);
+                        res = GetStructVal(obj);
+                    }
                     else if (msg_type == "0323")//平台加入退出营运应答（营运状态应答）
                     {
                         Structs.Struct0323 obj = ConverTo0323(msg_data);
+                        res = GetStructVal(obj);
+                    }
+                    else if (msg_type == "0324")//短信发送
+                    {
+                        Structs.Struct0324 obj = ConverTo0324(msg_data);
                         res = GetStructVal(obj);
                     }
                     else if (msg_type == "0325")//短信应答
@@ -910,6 +930,25 @@ namespace BS.MessageParser.Tool
         }
 
         /// <summary>
+        /// 解析030A数据
+        /// </summary>
+        /// <param name="msg_data"></param>
+        /// <returns></returns>
+        public static Structs.Struct030A ConverTo030A(string[] msg_data)
+        {
+            Structs.Struct030A obj = new Structs.Struct030A();
+            List<byte> codes = (List<byte>)GetString(msg_data, 23, 42, "string");
+            obj.VehicleId = EncodingGbk.GetString(codes.ToArray()).Trim().Replace("\0", "");
+            obj.LineId = Convert.ToUInt32((string)GetString(msg_data, 43, 46, "hex"), 16).ToString();
+            obj.VoiceNo = Convert.ToInt32((string) GetString(msg_data, 47, 47, "hex"), 16);
+            obj.SubLineCode = Convert.ToInt32((string) GetString(msg_data, 48, 48, "hex"), 16);
+            obj.ReportType = Convert.ToInt32((string) GetString(msg_data, 49, 49, "hex"), 16);
+            obj.UpDown = Convert.ToInt32((string)GetString(msg_data, 50, 50, "hex"), 16);
+            obj.ReportCode = (string) GetString(msg_data, 51, 66, "hex");
+            return obj;
+        }
+
+        /// <summary>
         /// 解析030B数据
         /// </summary>
         /// <param name="msg_data"></param>
@@ -946,6 +985,30 @@ namespace BS.MessageParser.Tool
             obj.AlertCode = Convert.ToInt32((string)GetString(msg_data, 71, 72, "int"), 16);//GPS速度	2
 
             return obj;
+        }
+
+        /// <summary>
+        /// 解析0317数据
+        /// </summary>
+        /// <param name="msg_data"></param>
+        /// <returns></returns>
+        public static Structs.Struct0317 ConverTo0317(string[] msg_data)
+        {
+            Structs.Struct0317 obj = new Structs.Struct0317();
+            List<byte> codes = (List<byte>)GetString(msg_data, 23, 42, "string");
+            obj.VehicleId = EncodingGbk.GetString(codes.ToArray()).Trim().Replace("\0", "");
+            List<byte> nums = (List<byte>)GetString(msg_data, 43, 62, "string");
+            obj.VehicleNumber = EncodingGbk.GetString(nums.ToArray()).Trim().Replace("\0", "");
+            obj.CompleteBC = Convert.ToInt32((string) GetString(msg_data, 63, 63, "hex"), 16);
+            obj.PlanBC = Convert.ToInt32((string) GetString(msg_data, 64, 64, "hex"), 16);
+
+            obj.FaCheTime = Convert.ToInt32((string) GetString(msg_data, 65, 65, "hex"), 16) + ":" +
+                            Convert.ToInt32((string) GetString(msg_data, 66, 66, "hex"), 16);
+            List<byte> datetimes = (List<byte>)GetString(msg_data, 67, 80, "string");//时间	14	TIME
+            obj.UpdateTime = EncodingGbk.GetString(datetimes.ToArray());
+            obj.UpdateTime = GetTimeByString(obj.UpdateTime); // 设置格式为 yyyy-MM-dd hh:mm:ss 
+            return obj;
+
         }
 
         /// <summary>
@@ -988,6 +1051,21 @@ namespace BS.MessageParser.Tool
         }
 
         /// <summary>
+        /// 解析0322数据
+        /// </summary>
+        /// <param name="msg_data"></param>
+        /// <returns></returns>
+        public static Structs.Struct0322 ConverTo0322(string[] msg_data)
+        {
+            Structs.Struct0322 obj = new Structs.Struct0322();
+            List<byte> codes = (List<byte>)GetString(msg_data, 23, 42, "string");
+            obj.VehicleId = EncodingGbk.GetString(codes.ToArray()).Trim().Replace("\0", "");
+            obj.LineId = Convert.ToUInt32((string)GetString(msg_data, 43, 46, "hex"), 16).ToString();
+            obj.Mode = (string) GetString(msg_data, 47, 47, "hex");
+            return obj;
+        }
+
+        /// <summary>
         /// 解析0323数据
         /// </summary>
         /// <param name="msg_data"></param>
@@ -1000,6 +1078,27 @@ namespace BS.MessageParser.Tool
             obj.Result = Convert.ToInt32((string)GetString(msg_data, 43, 43, "hex"), 16);//是否发送成功
             List<byte> MsgSendErroByte = (List<byte>)GetString(msg_data, 44, 93, "string");
             obj.FailReason = EncodingGbk.GetString(MsgSendErroByte.ToArray()).Replace("\0", "");//发送错误原因
+
+            return obj;
+        }
+
+        /// <summary>
+        /// 解析0323数据
+        /// </summary>
+        /// <param name="msg_data"></param>
+        /// <returns></returns>
+        public static Structs.Struct0324 ConverTo0324(string[] msg_data)
+        {
+            Structs.Struct0324 obj = new Structs.Struct0324();
+            List<byte> codes = (List<byte>)GetString(msg_data, 23, 42, "string");
+            obj.VehicleId = EncodingGbk.GetString(codes.ToArray()).Trim().Replace("\0", "");
+            obj.LineId = Convert.ToUInt32((string)GetString(msg_data, 43, 46, "hex"), 16).ToString();
+            obj.Type = Convert.ToInt32((string) GetString(msg_data, 47, 47, "hex"), 16).ToString();
+            obj.Content =
+                EncodingGbk.GetString(((List<byte>) GetString(msg_data, 48, 147, "string")).ToArray())
+                    .Trim()
+                    .Replace("\0", "");
+            obj.MsgId = Convert.ToInt32((string) GetString(msg_data, 148, 151, "hex"), 16).ToString();
 
             return obj;
         }

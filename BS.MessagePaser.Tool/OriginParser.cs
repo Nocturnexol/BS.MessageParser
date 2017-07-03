@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using Bs.MessageParser.Tool.Common;
 using BS.MessageParser.Tool.Model;
 using BS.MessageParser.Tool.Common;
+using Newtonsoft.Json;
 
 namespace BS.MessageParser.Tool
 {
     public static class OriginParser
     {
         private static readonly Encoding MessageEncoding = Encoding.GetEncoding("GBK");
-        public static string Parse(byte[] arr)
+        public static string Parse(byte[] arr,out string cmd)
         {
             int vnEndIndex;
             var data = arr.ParseBaseData(out vnEndIndex);
             var bodyArr = arr.CloneRange(vnEndIndex + 8, arr.Length - 6 - (vnEndIndex + 8) + 1);
             var res = string.Empty;
+            cmd = null;
             if (data.CommandCode == 0x10)
             {
                 var body = Parse0X10(bodyArr);
@@ -31,6 +35,7 @@ namespace BS.MessageParser.Tool
             {
                 var body = Parse0X14(bodyArr);
                 res= GetString(body);
+                cmd = JsonConvert.SerializeObject(body);
             }
             else if (data.CommandCode == 0x17)
             {
@@ -513,7 +518,8 @@ namespace BS.MessageParser.Tool
 
         private static string GetLongLatitude(IList<byte> arr)
         {
-            return string.Format("{0}°{1}.{2}{3}", arr[0], arr[1], arr[2], arr[3]);
+            var fraction = decimal.Parse(string.Format("{0}.{1}{2}", arr[1], arr[2], arr[3]));
+            return string.Format("{0}.{1}°", arr[0], (fraction / 60 + "").Replace(".", ""));
         }
         private static string GetDateStr(IList<byte> date)
         {
@@ -558,7 +564,15 @@ namespace BS.MessageParser.Tool
                     }
                     else
                     {
-                        sb.AppendFormat("{0} => {1},", attr != null ? attr.Description : p.Name, val);
+                        if (p.Name == "CommandCode")
+                        {
+                            sb.AppendFormat("{0} => 0x{1:X2} {2},", attr != null ? attr.Description : p.Name, val,
+                                ((CommandCode) (byte) val).GetDescription());
+                        }
+                        else
+                        {
+                            sb.AppendFormat("{0} => {1},", attr != null ? attr.Description : p.Name, val);
+                        }
                     }
                     sb.Append("\r\n");
                 }

@@ -1,4 +1,5 @@
-﻿@{
+﻿@using Bs.MessageParser.Tool.Common
+@{
     ViewBag.Title = "报文解析";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -26,6 +27,7 @@
         <br />
         <button id="parse" class="btn btn-success">解析</button>
         <button id="clear" class="btn btn-danger">清空</button>
+        <a id="locate" class="btn btn-warning hidden" target="_blank">定位</a>
     </div>
 </div>
 <div id="content" class="col-sm-12"></div>
@@ -39,9 +41,19 @@
                 type: "POST",
                 data: { msg: c },
                 success: function(n) {
-                    n.IsSuccess
-                        ? $('#content').html((('[' + (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") + ']----------------,' + n.Message).replace(/,/g, "<br/>") + '<br/>')+$('#content').html()) 
-                        : layer.alert("解析失败：" + n.Message, { icon: 2 });
+                    if (n.IsSuccess){
+                        $('#content').html((('[' + (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") + ']----------------,' + n.Message).replace(/,/g, "<br/>") + '<br/>') + $('#content').html());
+                        if (n.Text) {
+                            var txt = $.parseJSON(n.Text);
+                            $('#locate').attr('href',
+                                "/MessageParse/MessageParse/Locate?lon=" + txt.Longitude+ "&lat=" + txt.Latitude);
+                            $('#locate').removeClass('hidden');
+                        } else {
+                            $('#locate').addClass('hidden');
+                        }
+                    }
+                    else
+                        layer.alert("解析失败：" + n.Message, { icon: 2 });
                 }
             });
         } else {
@@ -52,6 +64,9 @@
     $('#clear').click(function() {
         $('#content').html('');
         $('#msg').val('');
+       if (!$('#locate').is(":hidden")) {
+           $('#locate').addClass('hidden');
+       }
     });
 
     // 对Date的扩展，将 Date 转化为指定格式的String   

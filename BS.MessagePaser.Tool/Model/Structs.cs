@@ -1422,6 +1422,10 @@ namespace BS.MessageParser.Tool.Model
             /// </summary>
             public int VoiceNo { get; set; }
             /// <summary>
+            ///子线路编码[1,Unit8]
+            /// </summary>
+            public int SubLineCode { get; set; }
+            /// <summary>
             /// 报站类型[1,Unit8]
             /// </summary>
             public int ReportType { get; set; }
@@ -1700,13 +1704,16 @@ namespace BS.MessageParser.Tool.Model
             /// </summary>
             public int CompleteBC { get; set; }
             /// <summary>
-            /// 实际班次数[1,byte]
+            /// 计划班次数[1,byte]
             /// </summary>
             public int PlanBC { get; set; }
             /// <summary>
             /// 发车时间[2,bytes]，HHmm
             /// </summary>
-            public string FaCheTime { get; set; }
+            public string FaCheTime { get; set; }/// <summary>
+            /// 完成班次更新时间[14,Time]
+            /// </summary>
+            public string UpdateTime { get; set; }
         }
         #endregion
 
@@ -1864,14 +1871,14 @@ namespace BS.MessageParser.Tool.Model
             /// 线路名ID[4,unit32]
             /// </summary>
             public string LineId { get; set; }
-            /// <summary>
-            /// 加入/退出营运[1,byte],0-加入；1-退出
-            /// </summary>
-            public int InOut { get; set; }
-            /// <summary>
-            /// 确认/取消[1,byte],0-确认；1-取消
-            /// </summary>
-            public int Ok { get; set; }
+            ///// <summary>
+            ///// 加入/退出营运[1,byte],0-加入；1-退出
+            ///// </summary>
+            //public int InOut { get; set; }
+            ///// <summary>
+            ///// 确认/取消[1,byte],0-确认；1-取消
+            ///// </summary>
+            //public int Ok { get; set; }
             /// <summary>
             /// 加入/退出模式[1,byte],01H=线路营运； 81H=正常退出；02H=交通车；82H=故障；03H=特约车；83H=保养；84H=事故；85H=肇事
             /// </summary>

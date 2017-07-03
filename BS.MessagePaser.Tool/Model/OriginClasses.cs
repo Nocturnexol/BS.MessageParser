@@ -6,11 +6,11 @@ namespace BS.MessageParser.Tool.Model
 
     public class BaseData
     {
-        ///// <summary>
-        ///// 标识位
-        ///// </summary>
-        //[Description("*")]
-        //public ushort BeginMark { get; set; }
+        /// <summary>
+        /// 命令字
+        /// </summary>
+        [Description("命令字")]
+        public byte CommandCode { get; set; }
 
         /// <summary>
         /// 数据长度
@@ -79,22 +79,10 @@ namespace BS.MessageParser.Tool.Model
         public byte SubLineCode { get; set; }
 
         /// <summary>
-        /// 命令字
-        /// </summary>
-        [Description("命令字")]
-        public byte CommandCode { get; set; }
-
-        /// <summary>
         /// 校验码
         /// </summary>
       [Description("校验码")]
         public byte CheckCode { get; set; }
-
-        //public string GetDateTimeStr(string format)
-        //{
-        //    var dateTime = new DateTime(int.Parse("20" + Date[0]), Date[1], Date[2], Time[0], Time[1], Time[2]);
-        //    return dateTime.ToString(format);
-        //}
 
     }
 
@@ -927,6 +915,27 @@ namespace BS.MessageParser.Tool.Model
         /// </summary>
         [Description("数据")]
         public string Data { get; set; }
+    }
+
+    public class PassengerFlow
+    {
+        public ushort STX { get; set; }
+        [Description("协议帧长度")]
+        public ushort Length { get; set; }
+        [Description("设备类型")]
+        public byte DeviceType { get; set; }
+        [Description("设备ID")]
+        public byte DeviceId { get; set; }
+        public byte CmdId { get; set; }
+        [Description("协议状态")]
+        public byte Status { get; set; }
+        [Description("序列号")]
+        public byte SerialId { get; set; }
+        [Description("时间")]
+        public string DateTime { get; set; }
+        [Description("车牌号")]
+        public string VehicleNum { get; set; }
+        public ushort CRC16 { get; set; }
     }
 
     public class Data0X47
