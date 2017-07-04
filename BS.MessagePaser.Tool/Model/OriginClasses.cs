@@ -3,7 +3,57 @@ using System.ComponentModel;
 
 namespace BS.MessageParser.Tool.Model
 {
+    public class BaseDataDown
+    {
+        /// <summary>
+        /// 命令字
+        /// </summary>
+        [Description("命令字")]
+        public byte CommandCode { get; set; }
 
+        /// <summary>
+        /// 数据长度
+        /// </summary>
+        [Description("数据长度")]
+        public ushort DataLength { get; set; }
+
+        /// <summary>
+        /// 版本
+        /// </summary>
+        [Description("版本")]
+        public string Version { get; set; }
+
+        /// <summary>
+        /// 序列号
+        /// </summary>
+        [Description("序列号")]
+        public byte SerialNum { get; set; }
+
+        /// <summary>
+        /// 车辆编号
+        /// </summary>
+        [Description("车辆编号")]
+        public string VehicleNum { get; set; }
+
+        /// <summary>
+        /// 日期
+        /// </summary>
+        [Description("日期")]
+        public string Date { get; set; }
+
+        /// <summary>
+        /// 时间
+        /// </summary>
+        [Description("时间")]
+        public string Time { get; set; }
+
+        /// <summary>
+        /// 校验码
+        /// </summary>
+        [Description("校验码")]
+        public string CheckCode { get; set; }
+
+    }
     public class BaseData
     {
         /// <summary>
@@ -22,7 +72,7 @@ namespace BS.MessageParser.Tool.Model
         /// 版本
         /// </summary>
         [Description("版本")]
-        public byte Version { get; set; }
+        public string Version { get; set; }
 
         /// <summary>
         /// 序列号1
@@ -82,7 +132,7 @@ namespace BS.MessageParser.Tool.Model
         /// 校验码
         /// </summary>
       [Description("校验码")]
-        public byte CheckCode { get; set; }
+        public string CheckCode { get; set; }
 
     }
 
@@ -993,5 +1043,110 @@ namespace BS.MessageParser.Tool.Model
         /// </summary>
         [Description("报站语音序号")]
         public byte Num { get; set; }
+    }
+
+    public class Data0X50
+    {
+        [Description("应答的命令字")]
+        public string Cmd { get; set; }
+        [Description("应答的序列号")]
+        public string SerialNum { get; set; }
+        [Description("应答返回值")]
+        public string ReturnValue { get; set; }
+    }
+
+    public class Data0X65
+    {
+        [Description("日期")]
+        public string Date { get; set; }
+        [Description("时间")]
+        public string Time { get; set; }
+    }
+
+    public class Data0X73
+    {
+        [Description("摄像头编号")]
+        public string CamNum { get; set; }
+        [Description("图像分辨率")]
+        public string Resolution { get; set; }
+        
+    }
+    public class Data0X76
+    {
+        [Description("摄像头编号")]
+        public string CamNum { get; set; }
+    }
+
+    public class Data0X8E
+    {
+        [Description("车号")]
+        public string VehicleNum { get; set; }
+        [Description("完成班次数")]
+        public byte Completed { get; set; }
+        [Description("计划班次数")]
+        public byte Plan { get; set; }
+        [Description("下一班发车时间")]
+        public string NextTime { get; set; }
+        [Description("完成班次更新日期")]
+        public string UpdateDate { get; set; }
+        [Description("完成班次更新时间")]
+        public string UpdateTime { get; set; }
+    }
+
+    public class Data0X8F
+    {
+        [Description("SIM卡ICCID号码")]
+        public string ICCID { get; set; }
+        [Description("SIM卡电话号码")]
+        public string PhoneNum { get; set; }
+    }
+    public class Data0X90
+    {
+        [Description("指令类型")]
+        public byte Type { get; set; }
+        [Description("语音指令序号")]
+        public string Num { get; set; }
+        [Description("指令文本内容")]
+        public string Content { get; set; }
+        [Description("消息ID")]
+        public string MsgId { get; set; }
+    }
+    public class Data0X91
+    {
+        [Description("线路名称")]
+        public string LineName { get; set; }
+        [Description("线路ID")]
+        public uint LineId { get; set; }
+        [Description("子线路编码")]
+        public byte SubLineEncoding { get; set; }
+        [Description("报站类型")]
+        public byte ReportType { get; set; }
+        [Description("上下行标识")]
+        public byte DirectionMark { get; set; }
+        [Description("报站掩码")]
+        public string ReportMask { get; set; }
+    }
+
+    public class Data0X92
+    {
+        [Description("刷卡日期")]
+        public string Date { get; set; }
+        [Description("刷卡时间")]
+        public string Time { get; set; }
+        [Description("卡号")]
+        public string CardNum { get; set; }
+        [Description("工号")]
+        public string WorkNum { get; set; }
+        [Description("姓名")]
+        public string Name { get; set; }
+        [Description("工种")]
+        public string WorkType { get; set; }
+
+    }
+
+    public class Data0X98
+    {
+        [Description("加入/退出")]
+        public string Status { get; set; }
     }
 }

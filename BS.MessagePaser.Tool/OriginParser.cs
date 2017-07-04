@@ -14,6 +14,65 @@ namespace BS.MessageParser.Tool
     public static class OriginParser
     {
         private static readonly Encoding MessageEncoding = Encoding.GetEncoding("GBK");
+
+        public static string ParseDown(byte[] arr)
+        {
+            int vnEndIndex;
+            var data = arr.ParseBaseDataDown(out vnEndIndex);
+            var bodyArr = arr.CloneRange(vnEndIndex + 8, arr.Length - 2 - (vnEndIndex + 8) + 1);
+            var res = string.Empty;
+            if (data.CommandCode == 0x50)
+            {
+                var body = Parse0X50(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x65)
+            {
+                var body = Parse0X65(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x73)
+            {
+                var body = Parse0X73(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x76)
+            {
+                var body = Parse0X76(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x8e)
+            {
+                var body = Parse0X8E(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x8f)
+            {
+                var body = Parse0X8F(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x90)
+            {
+                var body = Parse0X90(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x91)
+            {
+                var body = Parse0X91(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x92)
+            {
+                var body = Parse0X92(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x98)
+            {
+                var body = Parse0X98(bodyArr);
+                res = GetString(body);
+            }
+            return GetString(data) + res;
+        }
         public static string Parse(byte[] arr,out string cmd)
         {
             int vnEndIndex;
@@ -35,7 +94,14 @@ namespace BS.MessageParser.Tool
             {
                 var body = Parse0X14(bodyArr);
                 res= GetString(body);
-                cmd = JsonConvert.SerializeObject(body);
+                cmd =
+                    JsonConvert.SerializeObject(
+                        new
+                        {
+                            lon = body.Longitude,
+                            lat = body.Latitude,
+                            time = string.Format("{0} {1}", data.Date, data.Time)
+                        });
             }
             else if (data.CommandCode == 0x17)
             {
@@ -494,6 +560,119 @@ namespace BS.MessageParser.Tool
             return body;
         }
 
+        private static Data0X50 Parse0X50(byte[] arr)
+        {
+            var body = new Data0X50();
+            body.Cmd = Convert.ToString(arr[0], 16);
+            body.SerialNum = Convert.ToString(arr[1], 16);
+            body.ReturnValue = arr.CloneRange(2, arr.Length - 2).ByteArrToHexStr();
+            return body;
+        }
+        private static Data0X65 Parse0X65(byte[] arr)
+        {
+            var body = new Data0X65();
+            body.Date = GetDateStr(arr.CloneRange(0, 3));
+            body.Time = GetTimeStr(arr.CloneRange(3, 2));
+            return body;
+        }
+        private static Data0X73 Parse0X73(byte[] arr)
+        {
+            var body = new Data0X73();
+            body.CamNum = Convert.ToUInt16(arr.CloneRange(1, 2).ByteArrToHexStr(), 16).ToString();
+            body.Resolution = arr[3].ToString("X");
+            return body;
+        }
+        private static Data0X76 Parse0X76(byte[] arr)
+        {
+            var body = new Data0X76();
+            body.CamNum = arr[0].ToString("X");
+            return body;
+        }
+        private static Data0X8E Parse0X8E(byte[] arr)
+        {
+            var body = new Data0X8E();
+            var vnEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte) 0);
+            body.VehicleNum = MessageEncoding.GetString(arr.CloneRange(0, vnEndIndex));
+            body.Completed = arr[vnEndIndex + 1];
+            body.Plan = arr[vnEndIndex + 2];
+            body.NextTime = GetTimeStr(arr.CloneRange(vnEndIndex + 3, 2));
+            body.UpdateDate = GetDateStr(arr.CloneRange(vnEndIndex + 5, 3));
+            body.UpdateTime = GetTimeStr(arr.CloneRange(vnEndIndex + 8, 3));
+            return body;
+        }
+        private static Data0X8F Parse0X8F(byte[] arr)
+        {
+            var body = new Data0X8F();
+            var icEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
+            body.ICCID = MessageEncoding.GetString(arr.CloneRange(0, icEndIndex));
+
+            var phoneNumEndIndex =
+                Array.IndexOf(arr.CloneRange(icEndIndex + 1, arr.Length - (icEndIndex + 1)), (byte) 0) + icEndIndex + 1;
+            body.PhoneNum = MessageEncoding.GetString(arr.CloneRange(icEndIndex + 1, phoneNumEndIndex - (icEndIndex + 1)));
+
+            return body;
+        }
+        private static Data0X90 Parse0X90(byte[] arr)
+        {
+            var body = new Data0X90();
+            var contentEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
+            body.Type = arr[0];
+            body.Num = arr[1].ToString("X");
+            body.Content = MessageEncoding.GetString(arr.CloneRange(2, contentEndIndex - 2));
+            body.MsgId = arr.CloneRange(contentEndIndex + 1, 4).ByteArrToHexStr();
+            return body;
+        }
+        private static Data0X91 Parse0X91(byte[] arr)
+        {
+            var body = new Data0X91();
+            var lineEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
+            body.LineName = MessageEncoding.GetString(arr.CloneRange(0, lineEndIndex));
+            body.LineId = Convert.ToUInt32(arr.CloneRange(lineEndIndex + 1, 3).ByteArrToHexStr(), 16);
+            body.SubLineEncoding = arr[lineEndIndex + 4];
+            body.ReportType = arr[lineEndIndex + 5];
+            body.DirectionMark = arr[lineEndIndex + 6];
+            body.ReportMask = arr.CloneRange(lineEndIndex + 7, 16).ByteArrToHexStr();
+            return body;
+        }
+        private static Data0X92 Parse0X92(byte[] arr)
+        {
+            var body = new Data0X92();
+            body.Date = GetDateStr(arr.CloneRange(0, 3));
+            body.Time = GetTimeStr(arr.CloneRange(3, 3));
+
+            var firstEndIndex = Array.IndexOf(arr.CloneRange(6, arr.Length - 6), (byte)0) + 6;
+            var secEndIndex =
+                Array.IndexOf(arr.CloneRange(firstEndIndex + 1, arr.Length - (firstEndIndex + 1)), (byte)0) +
+                firstEndIndex + 1;
+            body.CardNum = MessageEncoding.GetString(arr.CloneRange(6, firstEndIndex - 6));
+            body.WorkNum = MessageEncoding.GetString(arr.CloneRange(firstEndIndex + 1, secEndIndex - (firstEndIndex + 1)));
+
+            body.Name = MessageEncoding.GetString(arr.CloneRange(secEndIndex + 1, arr.Length - 2 - (secEndIndex + 1)));
+
+            body.WorkType = arr[arr.Length - 1].ToString("X");
+            return body;
+        }
+        private static Data0X98 Parse0X98(byte[] arr)
+        {
+            var body = new Data0X98();
+            body.Status = arr[0].ToString("X");
+            return body;
+        }
+        private static BaseDataDown ParseBaseDataDown(this byte[] arr, out int endIndex)
+        {
+            var vnEndIndex = Array.IndexOf(arr.CloneRange(6, 16), (byte)0) + 6;
+            endIndex = vnEndIndex;
+            var data = new BaseDataDown();
+            data.DataLength = Convert.ToUInt16(arr.CloneRange(2, 2).ByteArrToHexStr(), 16);
+            data.Version = Convert.ToString(arr[4], 16);
+            data.SerialNum= arr[5];
+            data.VehicleNum = MessageEncoding.GetString(arr.CloneRange(6, vnEndIndex - 6));
+            data.Date = GetDateStr(arr.CloneRange(vnEndIndex + 1, 3));
+            data.Time = GetTimeStr(arr.CloneRange(vnEndIndex + 4, 3));
+            data.CommandCode = arr[vnEndIndex + 7];
+            data.CheckCode = arr[arr.Length - 1].ToString("X");
+            return data;
+        }
         private static BaseData ParseBaseData(this byte[] arr,out int endIndex)
         {
             var vnEndIndex = Array.IndexOf(arr.CloneRange(10, 16), (byte)0) + 10;
@@ -501,7 +680,7 @@ namespace BS.MessageParser.Tool
             var data = new BaseData();
             //data.BeginMark = Convert.ToUInt16(arr.CloneRange(0, 2).ByteArrToHexStr(), 16);
             data.DataLength = Convert.ToUInt16(arr.CloneRange(2, 2).ByteArrToHexStr(), 16);
-            data.Version = arr[4];
+            data.Version = Convert.ToString(arr[4], 16);
             data.SerialNum1 = arr[5];
             data.WireStatus = arr[6];
             data.SerialNum2 = Convert.ToUInt16(arr.CloneRange(7, 2).ByteArrToHexStr(), 16);
@@ -512,14 +691,16 @@ namespace BS.MessageParser.Tool
             data.CommandCode = arr[vnEndIndex + 7];
             data.LineId = arr.CloneRange(arr.Length - 5, 3).ByteArrToInt();
             data.SubLineCode = arr[arr.Length - 2];
-            data.CheckCode = arr[arr.Length - 1];
+            data.CheckCode = arr[arr.Length - 1].ToString("X");
             return data;
         }
 
         private static string GetLongLatitude(IList<byte> arr)
         {
-            var fraction = decimal.Parse(string.Format("{0}.{1}{2}", arr[1], arr[2], arr[3]));
-            return string.Format("{0}.{1}°", arr[0], (fraction / 60 + "").Replace(".", ""));
+            var fraction =
+                decimal.Parse(string.Format("{0}.{1}", arr[1],
+                    Convert.ToUInt16(arr.CloneRange(2, 2).ByteArrToHexStr(), 16)));
+            return string.Format("{0}.{1}°", arr[0], (Math.Round(fraction / 60, 6) + "").Replace("0.", ""));
         }
         private static string GetDateStr(IList<byte> date)
         {

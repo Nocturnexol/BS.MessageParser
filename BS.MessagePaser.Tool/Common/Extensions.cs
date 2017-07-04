@@ -107,6 +107,7 @@ namespace BS.MessageParser.Tool.Common
         {
             var str = enumValue.ToString();
             var field = enumValue.GetType().GetField(str);
+            if (field == null) return str;
             var objs = field.GetCustomAttributes(typeof(DescriptionAttribute), false);
             if (objs.Length == 0) return str;
             var attr = (DescriptionAttribute) objs[0];

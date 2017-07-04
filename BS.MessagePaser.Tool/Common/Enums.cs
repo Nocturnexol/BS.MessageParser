@@ -47,7 +47,27 @@ namespace Bs.MessageParser.Tool.Common
         [Description("员工卡刷卡信息")]
         _0X48 = 0x48,
         [Description("上传手动切换线路号")]
-        _0X49 = 0x49
+        _0X49 = 0x49,
+        [Description("应答车载机的指令")]
+        _0X50 = 0x50,
+        [Description("提取车载机的行驶记录")]
+        _0X65 = 0x65,
+        [Description("发送拍照命令")]
+        _0X73 = 0x73,
+        [Description("设定报警默认摄像头编号")]
+        _0X76 = 0x76,
+        [Description("发送公交班次信息")]
+        _0X8E = 0x8e,
+        [Description("发送SIM卡号码")]
+        _0X8F = 0x8f,
+        [Description("发送公交文本信息")]
+        _0X90 = 0x90,
+        [Description("设置公交车线路号")]
+        _0X91 = 0x91,
+        [Description("员工刷卡确认")]
+        _0X92 = 0x92,
+        [Description("设置加入营运/退出营运")]
+        _0X98 = 0x98
     }
 
     public enum DataType0X45
