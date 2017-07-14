@@ -119,11 +119,16 @@ namespace BS.MessageParser.Tool.Common
             return string.Format("[{0:MM/dd HH:mm:ss}] {1}\r\n", DateTime.Now, str);
         }
 
-        public static T[] CloneRange<T>(this IList<T> arr,int offset,int length)
+        public static T[] CloneRange<T>(this IList<T> arr, int offset, int length)
         {
             return arr.Skip(offset).Take(length).ToArray();
-        } 
+        }
 
+    }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class HiddenAttribute : Attribute
+    {
 
     }
 }

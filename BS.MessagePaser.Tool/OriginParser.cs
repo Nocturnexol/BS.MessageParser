@@ -100,7 +100,7 @@ namespace BS.MessageParser.Tool
                         {
                             lon = body.Longitude,
                             lat = body.Latitude,
-                            time = string.Format("{0} {1}", data.Date, data.Time)
+                            time = GetDateTimeStr(data.Date,data.Time)
                         });
             }
             else if (data.CommandCode == 0x17)
@@ -166,7 +166,22 @@ namespace BS.MessageParser.Tool
             else if (data.CommandCode == 0x45)
             {
                 var body = Parse0X45(bodyArr);
+
                 res = GetString(body);
+                if (body.DataType == (byte)DataType0X45.PassengerFlow)
+                {
+                    var bodyData = Parse0X45_pf(body.Data);
+                    res += GetString(bodyData);
+                }
+                else if (body.DataType == (byte)DataType0X45.DVR)
+                {
+                    var bodyData = Parse0X45_dvr(body.Data);
+                    res += GetString(bodyData);
+                }
+                else if (body.DataType == (byte)DataType0X45.CAN)
+                {
+
+                }
             }
             else if (data.CommandCode == 0x47)
             {
@@ -516,11 +531,33 @@ namespace BS.MessageParser.Tool
 
             body.DataType = arr[15];
 
-            body.Data = arr.Skip(16).ByteArrToHexStr();
+           body.Data = arr.Skip(16);
 
             return body;
         }
 
+        private static PassengerFlow Parse0X45_pf(IEnumerable<byte> arr)
+        {
+            var pf = new PassengerFlow();
+            var byteArr = arr as byte[] ?? arr.ToArray();
+            pf.Length = Convert.ToUInt16(byteArr.CloneRange(2, 2).ByteArrToHexStr(), 16);
+            pf.DeviceType = byteArr[4];
+            pf.DeviceId = byteArr[5];
+            pf.CmdId = byteArr[6];
+            pf.Status = byteArr[7];
+            pf.SerialId = byteArr[9];
+
+            pf.DateTime = GetDateTimeStr(GetDateStr(byteArr.CloneRange(10, 3)), GetTimeStr(byteArr.CloneRange(13, 3)));
+
+            return pf;
+        }
+
+        private static DVR Parse0X45_dvr(IEnumerable<byte> arr)
+        {
+            var dvr = new DVR();
+
+            return dvr;
+        }
         private static Data0X47 Parse0X47(IList<byte> arr)
         {
             var body=new Data0X47();
@@ -700,7 +737,7 @@ namespace BS.MessageParser.Tool
             var fraction =
                 decimal.Parse(string.Format("{0}.{1}", arr[1],
                     Convert.ToUInt16(arr.CloneRange(2, 2).ByteArrToHexStr(), 16)));
-            return string.Format("{0}.{1}°", arr[0], (Math.Round(fraction / 60, 6) + "").Replace("0.", ""));
+            return string.Format("{0}.{1}°", arr[0], (Math.Round(fraction / 60, 6) * 10 + "").Replace(".", ""));
         }
         private static string GetDateStr(IList<byte> date)
         {
@@ -711,6 +748,11 @@ namespace BS.MessageParser.Tool
             return time.Count > 2
                 ? string.Format("{0:d2}:{1:d2}:{2:d2}", time[0], time[1], time[2])
                 : string.Format("{0:d2}:{1:d2}", time[0], time[1]);
+        }
+
+        private static string GetDateTimeStr(object date, object time)
+        {
+            return string.Format("{0} {1}", date, time);
         }
         private static string GetString(object obj)
         {
@@ -731,12 +773,16 @@ namespace BS.MessageParser.Tool
                     }
                     else if (p.PropertyType.IsGenericType)
                     {
-                        sb.AppendFormat("{0}=>,", attr != null ? attr.Description : p.Name);
-                        var count = p.PropertyType.GetProperty("Count").GetValue(val, null);
-                        for (var i = 0; i <(int) count; i++)
+                        if (p.GetCustomAttributes(typeof(HiddenAttribute), false).Length == 0)
                         {
-                            sb.AppendFormat("{0}、,", i + 1);
-                            sb.AppendFormat(GetString(p.PropertyType.GetMethod("get_Item").Invoke(val, new object[] {i})));
+                            sb.AppendFormat("{0}=>,", attr != null ? attr.Description : p.Name);
+                            var count = p.PropertyType.GetProperty("Count").GetValue(val, null);
+                            for (var i = 0; i < (int) count; i++)
+                            {
+                                sb.AppendFormat("{0}、,", i + 1);
+                                sb.AppendFormat(
+                                    GetString(p.PropertyType.GetMethod("get_Item").Invoke(val, new object[] {i})));
+                            }
                         }
                     }
                     else if (!p.PropertyType.IsPrimitive && p.PropertyType != typeof(string))

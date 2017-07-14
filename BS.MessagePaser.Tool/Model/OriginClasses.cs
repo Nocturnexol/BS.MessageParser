@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using BS.MessageParser.Tool.Common;
 
 namespace BS.MessageParser.Tool.Model
 {
@@ -964,12 +965,13 @@ namespace BS.MessageParser.Tool.Model
         /// 数据
         /// </summary>
         [Description("数据")]
-        public string Data { get; set; }
+        [Hidden]
+        public IEnumerable<byte> Data { get; set; }
     }
 
     public class PassengerFlow
     {
-        public ushort STX { get; set; }
+        //public ushort STX { get; set; }
         [Description("协议帧长度")]
         public ushort Length { get; set; }
         [Description("设备类型")]
@@ -986,6 +988,42 @@ namespace BS.MessageParser.Tool.Model
         [Description("车牌号")]
         public string VehicleNum { get; set; }
         public ushort CRC16 { get; set; }
+    }
+
+    public class DVR
+    {
+        [Description("时间/日期")]
+        public string DateTime { get; set; }
+        [Description("设备ID")]
+        public byte DeviceId { get; set; }
+        [Description("设备连接状态")]
+        public byte DeviceStatus { get; set; }
+        [Description("站点编号")]
+        public byte StationNum { get; set; }
+        [Description("站点序号")]
+        public byte StationOrder { get; set; }
+        [Description("上下行")]
+        public byte UpDown { get; set; }
+        [Description("生产厂商")]
+        public string Manufacturer { get; set; }
+        [Description("设备编号")]
+        public string DeviceNum { get; set; }
+        [Description("锁油命令")]
+        public byte LockCmd { get; set; }
+        [Description("刹车命令")]
+        public byte BrakeCmd { get; set; }
+        [Description("间隔时间命令")]
+        public string IntervalCmd { get; set; }
+        [Description("视频丢失状态")]
+        public byte VideoLostStatus { get; set; }
+        [Description("视频移动侦测状态")]
+        public byte VideoDetectionStatus { get; set; }
+        [Description("输入口报警")]
+        public string ImportAlert { get; set; }
+        [Description("硬盘状态")]
+        public string DiskStatus { get; set; }
+        [Description("无线网络通讯状态")]
+        public string WLANStatus { get; set; }
     }
 
     public class Data0X47

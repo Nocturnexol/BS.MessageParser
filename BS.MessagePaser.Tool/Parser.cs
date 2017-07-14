@@ -257,6 +257,7 @@ namespace BS.MessageParser.Tool
                         Structs.Struct0406 obj = Parser.ConvertTo0406(msg_data);
                         res = GetStructVal(obj);
                     }
+                    res = string.Format("Cmd => 0x{0},{1}", msg_type, res);
                 }
             }
             catch (Exception ex)
