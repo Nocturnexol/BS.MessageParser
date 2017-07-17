@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using Bs.MessageParser.Tool.Common;
@@ -14,12 +13,17 @@ namespace BS.MessageParser.Tool
     public static class OriginParser
     {
         private static readonly Encoding MessageEncoding = Encoding.GetEncoding("GBK");
-
+        public static MessageVersion Version = MessageVersion.V28;
         public static string ParseDown(byte[] arr)
         {
             int vnEndIndex;
             var data = arr.ParseBaseDataDown(out vnEndIndex);
-            var bodyArr = arr.CloneRange(vnEndIndex + 8, arr.Length - 2 - (vnEndIndex + 8) + 1);
+            var bodyLen=arr.Length - 2 - (vnEndIndex + 8) + 1;
+            if (Version >= MessageVersion.V25)
+                bodyLen -= 3;
+            if (Version >= MessageVersion.V26)
+                bodyLen -= 1;
+            var bodyArr = arr.CloneRange(vnEndIndex + 8, bodyLen);
             var res = string.Empty;
             if (data.CommandCode == 0x50)
             {
@@ -592,7 +596,8 @@ namespace BS.MessageParser.Tool
             body.OldLineId = Convert.ToUInt32(arr.CloneRange(oldLineNameEndIndex + 1, 3).ByteArrToHexStr(), 16);
 
             if (arr.Count <= oldLineNameEndIndex + 4) return body;
-            body.Num = arr[oldLineNameEndIndex + 4];
+            if(Version>=MessageVersion.V24)
+                body.Num = arr[oldLineNameEndIndex + 4];
 
             return body;
         }
@@ -665,7 +670,9 @@ namespace BS.MessageParser.Tool
             var lineEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
             body.LineName = MessageEncoding.GetString(arr.CloneRange(0, lineEndIndex));
             body.LineId = Convert.ToUInt32(arr.CloneRange(lineEndIndex + 1, 3).ByteArrToHexStr(), 16);
-            body.SubLineEncoding = arr[lineEndIndex + 4];
+            if(Version>=MessageVersion.V24)
+                body.SubLineEncoding = arr[lineEndIndex + 4];
+            if (Version < MessageVersion.V26) return body;
             body.ReportType = arr[lineEndIndex + 5];
             body.DirectionMark = arr[lineEndIndex + 6];
             body.ReportMask = arr.CloneRange(lineEndIndex + 7, 16).ByteArrToHexStr();
@@ -718,6 +725,7 @@ namespace BS.MessageParser.Tool
             //data.BeginMark = Convert.ToUInt16(arr.CloneRange(0, 2).ByteArrToHexStr(), 16);
             data.DataLength = Convert.ToUInt16(arr.CloneRange(2, 2).ByteArrToHexStr(), 16);
             data.Version = Convert.ToString(arr[4], 16);
+            Version = (MessageVersion) arr[4];
             data.SerialNum1 = arr[5];
             data.WireStatus = arr[6];
             data.SerialNum2 = Convert.ToUInt16(arr.CloneRange(7, 2).ByteArrToHexStr(), 16);
@@ -726,8 +734,10 @@ namespace BS.MessageParser.Tool
             data.Date = GetDateStr(arr.CloneRange(vnEndIndex + 1, 3));
             data.Time = GetTimeStr(arr.CloneRange(vnEndIndex + 4, 3));
             data.CommandCode = arr[vnEndIndex + 7];
-            data.LineId = arr.CloneRange(arr.Length - 5, 3).ByteArrToInt();
-            data.SubLineCode = arr[arr.Length - 2];
+            if (Version >= MessageVersion.V25)
+                data.LineId = arr.CloneRange(arr.Length - 5, 3).ByteArrToHexStr();
+            if (Version >= MessageVersion.V26)
+                data.SubLineCode = arr[arr.Length - 2];
             data.CheckCode = arr[arr.Length - 1].ToString("X");
             return data;
         }

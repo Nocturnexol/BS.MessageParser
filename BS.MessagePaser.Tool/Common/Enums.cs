@@ -70,6 +70,15 @@ namespace Bs.MessageParser.Tool.Common
         _0X98 = 0x98
     }
 
+    public enum MessageVersion
+    {
+        V23 = 0x23,
+        V24 = 0x24,
+        V25 = 0x25,
+        V26 = 0x26,
+        V28 = 0x28
+    }
+
     public enum DataType0X45
     {
         PassengerFlow,

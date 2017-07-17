@@ -121,7 +121,7 @@ namespace BS.MessageParser.Tool.Model
         /// 线路ID
         /// </summary>
        [Description("线路ID")]
-        public int LineId { get; set; }
+        public string LineId { get; set; }
 
         /// <summary>
         /// 子线路编码
