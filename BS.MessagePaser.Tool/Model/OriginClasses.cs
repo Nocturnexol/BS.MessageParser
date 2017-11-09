@@ -233,6 +233,38 @@ namespace BS.MessageParser.Tool.Model
         public string Factory { get; set; }
 
     }
+
+    public class Data0X12
+    {
+        [Description("检测时间")]
+        public string TestTime { get; set; }
+
+        /// <summary>
+        /// 检测时卫星定位位置纬度
+        /// </summary>
+        [Description("检测时卫星定位位置纬度")]
+        public string Latitude { get; set; }
+
+        /// <summary>
+        /// 检测时卫星定位位置经度
+        /// </summary>
+        [Description("检测时卫星定位位置经度")]
+        public string Longitude { get; set; }
+
+        /// <summary>
+        /// 通讯模块硬件信息
+        /// </summary>
+        [Description("通讯模块硬件信息")]
+        public string TeleInfo { get; set; }
+
+        /// <summary>
+        /// SIM卡ICCID号码
+        /// </summary>
+        [Description("SIM卡ICCID号码")]
+        public string SIM { get; set; }
+
+    }
+
     public class Data0X14
     {
         /// <summary>
@@ -443,6 +475,16 @@ namespace BS.MessageParser.Tool.Model
         [Description("温度传感器")]
         public byte Sensor { get; set; }
         public byte RFID { get; set; }
+        /// <summary>
+        /// 客流计
+        /// </summary>
+        [Description("客流计")]
+        public byte PF { get; set; }
+        /// <summary>
+        /// 统一新能源（ECU连接）
+        /// </summary>
+        [Description("统一新能源（ECU连接）")]
+        public byte ECU { get; set; }
     }
 
     public class Data0X1A
@@ -1083,6 +1125,51 @@ namespace BS.MessageParser.Tool.Model
         public byte Num { get; set; }
     }
 
+    public class Data0X4A
+    {
+        /// <summary>
+        /// 通讯软件版本
+        /// </summary>
+        [Description("通讯软件版本")]
+        public string SoftwareVer { get; set; }
+
+        /// <summary>
+        /// 设备序列号
+        /// </summary>
+        [Description("设备序列号")]
+        public string DeviceNum { get; set; }
+
+        /// <summary>
+        /// 线路名称
+        /// </summary>
+        [Description("线路名称")]
+        public string LineName { get; set; }
+
+        /// <summary>
+        /// 线路ID
+        /// </summary>
+        [Description("线路ID")]
+        public int LineId { get; set; }
+
+        /// <summary>
+        /// 车牌号码
+        /// </summary>
+        [Description("车牌号码")]
+        public string PlateNum { get; set; }
+
+        /// <summary>
+        /// SIM卡ICCID号码
+        /// </summary>
+        [Description("SIM卡ICCID号码")]
+        public string SIM { get; set; }
+
+        /// <summary>
+        ///车载设备厂商
+        /// </summary>
+        [Description("车载设备厂商")]
+        public string Factory { get; set; }
+
+    }
     public class Data0X50
     {
         [Description("应答的命令字")]
@@ -1186,5 +1273,48 @@ namespace BS.MessageParser.Tool.Model
     {
         [Description("加入/退出")]
         public string Status { get; set; }
+    }
+
+    public class Data0X60
+    {
+        [Description("服务器地址")]
+        public string Addr { get; set; }
+        [Description("端口")]
+        public ushort Port { get; set; }
+        [Description("用户名")]
+        public string UserName { get; set; }
+        [Description("密码")]
+        public string Password { get; set; }
+    }
+    public class Data0X61
+    {
+        [Description("车载接入地址")]
+        public string Addr { get; set; }
+        [Description("端口")]
+        public ushort Port { get; set; }
+    }
+    public class Data0X62
+    {
+        [Description("链路检测日志日期")]
+        public string Date { get; set; }
+        [Description("服务器地址")]
+        public string Addr { get; set; }
+        [Description("端口")]
+        public ushort Port { get; set; }
+        [Description("用户名")]
+        public string UserName { get; set; }
+        [Description("密码")]
+        public string Password { get; set; }
+    }
+    public class Data0X63
+    {
+        [Description("VoIP接入地址")]
+        public string Addr { get; set; }
+        [Description("端口")]
+        public ushort Port { get; set; }
+        [Description("VoIP号码")]
+        public string Num { get; set; }
+        [Description("VoIP密码")]
+        public string Password { get; set; }
     }
 }

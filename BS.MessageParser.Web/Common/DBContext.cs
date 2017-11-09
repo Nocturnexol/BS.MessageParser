@@ -10,7 +10,7 @@ namespace BS.Microservice.Web.Common
     public class DBContext
     {
         public static MongoDBVisitor Mongo;
-        public static string DbName = "Microservice";
+        public static string DbName = "MessageParser";
         static DBContext()
         {
             string host = ConfigurationManager.AppSettings["mongo"];

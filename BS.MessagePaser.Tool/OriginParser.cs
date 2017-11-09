@@ -75,6 +75,26 @@ namespace BS.MessageParser.Tool
                 var body = Parse0X98(bodyArr);
                 res = GetString(body);
             }
+            if (data.CommandCode == 0x60)
+            {
+                var body = Parse0X60(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x61)
+            {
+                var body = Parse0X61(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x62)
+            {
+                var body = Parse0X62(bodyArr);
+                res = GetString(body);
+            }
+            if (data.CommandCode == 0x63)
+            {
+                var body = Parse0X63(bodyArr);
+                res = GetString(body);
+            }
             return GetString(data) + res;
         }
         public static string Parse(byte[] arr,out string cmd)
@@ -92,6 +112,11 @@ namespace BS.MessageParser.Tool
             else if (data.CommandCode == 0x11)
             {
                 var body = Parse0X11(bodyArr);
+                res = GetString(body);
+            }
+            else if (data.CommandCode == 0x12)
+            {
+                var body = Parse0X12(bodyArr);
                 res = GetString(body);
             }
             else if (data.CommandCode == 0x14)
@@ -202,6 +227,11 @@ namespace BS.MessageParser.Tool
                 var body = Parse0X49(bodyArr);
                 res = GetString(body);
             }
+            else if (data.CommandCode == 0x4a)
+            {
+                var body = Parse0X4A(bodyArr);
+                res = GetString(body);
+            }
             return GetString(data) + res;
         }
 
@@ -254,6 +284,22 @@ namespace BS.MessageParser.Tool
 
             body.Factory = MessageEncoding.GetString(arr.CloneRange(simEndIndex + 1, 1));
 
+            return body;
+        }
+
+        private static Data0X12 Parse0X12(IList<byte> arr)
+        {
+            var body = new Data0X12();
+            body.TestTime = string.Format("{0:d2}{1:d2}-{2:d2}-{3:d2} {4:d2}:{5:d2}:{6:d2}", arr[0], arr[1], arr[2], arr[3], arr[4], arr[5],
+                arr[6]);
+            body.Latitude = GetLongLatitude(arr.CloneRange(7, 4));
+            body.Longitude = GetLongLatitude(arr.CloneRange(11, 4));
+
+            var infoStrEndIndex = Array.IndexOf(arr.CloneRange(15, arr.Count - 15), (byte)0) + 15;
+            body.TeleInfo = MessageEncoding.GetString(arr.CloneRange(15, infoStrEndIndex - 15));
+            var iccidStrEndIndex =
+                Array.IndexOf(arr.CloneRange(infoStrEndIndex, arr.Count - infoStrEndIndex), (byte) 0) + infoStrEndIndex;
+            body.SIM = MessageEncoding.GetString(arr.CloneRange(infoStrEndIndex, iccidStrEndIndex - infoStrEndIndex));
             return body;
         }
         private static Data0X14 Parse0X14(IList<byte> arr)
@@ -335,6 +381,10 @@ namespace BS.MessageParser.Tool
             body.Sensor = arr[6];
             if (arr.Count <= 7) return body;
             body.RFID = arr[7];
+            if (arr.Count <= 8) return body;
+            body.PF = arr[8];
+            if (arr.Count <= 9) return body;
+            body.ECU = arr[9];
             return body;
         }
 
@@ -602,6 +652,45 @@ namespace BS.MessageParser.Tool
             return body;
         }
 
+        private static Data0X4A Parse0X4A(IList<byte> arr)
+        {
+            var body = new Data0X4A();
+            var verEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Count), (byte)0);
+            body.SoftwareVer = MessageEncoding.GetString(arr.CloneRange(0, verEndIndex));
+
+            var deviceNumStrEndIndex =
+                Array.IndexOf(arr.CloneRange(verEndIndex + 1, arr.Count - (verEndIndex + 1)), (byte)0) + verEndIndex +
+                1;
+            body.DeviceNum =
+                MessageEncoding.GetString(arr.CloneRange(verEndIndex + 1, deviceNumStrEndIndex - (verEndIndex + 1)));
+
+            var lineNameEndIndex =
+                Array.IndexOf(arr.CloneRange(deviceNumStrEndIndex + 1, arr.Count - (deviceNumStrEndIndex + 1)), (byte)0) +
+                deviceNumStrEndIndex + 1;
+            body.LineName =
+                MessageEncoding.GetString(arr.CloneRange(deviceNumStrEndIndex + 1,
+                    lineNameEndIndex - (deviceNumStrEndIndex + 1)));
+
+            body.LineId = arr.CloneRange(lineNameEndIndex + 1, 3).ByteArrToInt();
+
+            var plateNumEndIndex =
+                Array.IndexOf(arr.CloneRange(lineNameEndIndex + 4, arr.Count - (lineNameEndIndex + 4)), (byte)0) +
+                lineNameEndIndex + 4;
+            body.PlateNum =
+                MessageEncoding.GetString(arr.CloneRange(lineNameEndIndex + 4,
+                    plateNumEndIndex - (lineNameEndIndex + 4)));
+
+            var simEndIndex =
+                Array.IndexOf(arr.CloneRange(plateNumEndIndex + 1, arr.Count - (plateNumEndIndex + 1)), (byte)0) +
+                plateNumEndIndex + 1;
+            body.SIM =
+                MessageEncoding.GetString(arr.CloneRange(plateNumEndIndex + 1, simEndIndex - (plateNumEndIndex + 1)));
+
+            body.Factory = MessageEncoding.GetString(arr.CloneRange(simEndIndex + 1, 1));
+
+            return body;
+        }
+
         private static Data0X50 Parse0X50(byte[] arr)
         {
             var body = new Data0X50();
@@ -700,6 +789,82 @@ namespace BS.MessageParser.Tool
         {
             var body = new Data0X98();
             body.Status = arr[0].ToString("X");
+            return body;
+        }
+        private static Data0X60 Parse0X60(byte[] arr)
+        {
+            var body = new Data0X60();
+            var addrEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
+            var userNameEndIndex =
+                Array.IndexOf(arr.CloneRange(addrEndIndex + 4, arr.Length - (addrEndIndex + 4)), (byte)0) +
+                addrEndIndex + 4;
+            var pwdEndIndex =
+                Array.IndexOf(arr.CloneRange(userNameEndIndex + 1, arr.Length - (userNameEndIndex + 1)), (byte) 0) +
+                userNameEndIndex + 1;
+
+            body.Addr = MessageEncoding.GetString(arr.CloneRange(0, addrEndIndex));
+            body.Port = Convert.ToUInt16(arr.CloneRange(addrEndIndex + 1, 2).ByteArrToHexStr(), 16);
+
+            body.UserName =
+                MessageEncoding.GetString(arr.CloneRange(addrEndIndex + 3,
+                    userNameEndIndex - (addrEndIndex + 3)));
+            body.Password =
+                MessageEncoding.GetString(arr.CloneRange(userNameEndIndex + 1, pwdEndIndex - (userNameEndIndex + 1)));
+
+            return body;
+        }
+        private static Data0X61 Parse0X61(byte[] arr)
+        {
+            var body = new Data0X61();
+            var addrEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
+            body.Addr = MessageEncoding.GetString(arr.CloneRange(0, addrEndIndex));
+            body.Port = Convert.ToUInt16(arr.CloneRange(addrEndIndex + 1, 2).ByteArrToHexStr(), 16);
+
+            return body;
+        }
+        private static Data0X62 Parse0X62(byte[] arr)
+        {
+            var body = new Data0X62();
+
+            body.Date = GetDateStr(arr.CloneRange(0, 3));
+
+            var addrEndIndex = Array.IndexOf(arr.CloneRange(3, arr.Length), (byte) 0) + 3;
+            var userNameEndIndex =
+                Array.IndexOf(arr.CloneRange(addrEndIndex + 4, arr.Length - (addrEndIndex + 4)), (byte)0) +
+                addrEndIndex + 4;
+            var pwdEndIndex =
+                Array.IndexOf(arr.CloneRange(userNameEndIndex + 1, arr.Length - (userNameEndIndex + 1)), (byte)0) +
+                userNameEndIndex + 1;
+
+            body.Addr = MessageEncoding.GetString(arr.CloneRange(0, addrEndIndex));
+            body.Port = Convert.ToUInt16(arr.CloneRange(addrEndIndex + 1, 2).ByteArrToHexStr(), 16);
+
+            body.UserName =
+                MessageEncoding.GetString(arr.CloneRange(addrEndIndex + 3,
+                    userNameEndIndex - (addrEndIndex + 3)));
+            body.Password =
+                MessageEncoding.GetString(arr.CloneRange(userNameEndIndex + 1, pwdEndIndex - (userNameEndIndex + 1)));
+            return body;
+        }
+        private static Data0X63 Parse0X63(byte[] arr)
+        {
+            var body = new Data0X63();
+            var addrEndIndex = Array.IndexOf(arr.CloneRange(0, arr.Length), (byte)0);
+            var userNameEndIndex =
+                Array.IndexOf(arr.CloneRange(addrEndIndex + 4, arr.Length - (addrEndIndex + 4)), (byte)0) +
+                addrEndIndex + 4;
+            var pwdEndIndex =
+                Array.IndexOf(arr.CloneRange(userNameEndIndex + 1, arr.Length - (userNameEndIndex + 1)), (byte)0) +
+                userNameEndIndex + 1;
+
+            body.Addr = MessageEncoding.GetString(arr.CloneRange(0, addrEndIndex));
+            body.Port = Convert.ToUInt16(arr.CloneRange(addrEndIndex + 1, 2).ByteArrToHexStr(), 16);
+
+            body.Num =
+                MessageEncoding.GetString(arr.CloneRange(addrEndIndex + 3,
+                    userNameEndIndex - (addrEndIndex + 3)));
+            body.Password =
+                MessageEncoding.GetString(arr.CloneRange(userNameEndIndex + 1, pwdEndIndex - (userNameEndIndex + 1)));
             return body;
         }
         private static BaseDataDown ParseBaseDataDown(this byte[] arr, out int endIndex)

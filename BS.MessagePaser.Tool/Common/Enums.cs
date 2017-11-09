@@ -76,7 +76,8 @@ namespace Bs.MessageParser.Tool.Common
         V24 = 0x24,
         V25 = 0x25,
         V26 = 0x26,
-        V28 = 0x28
+        V28 = 0x28,
+        V30 = 0X30
     }
 
     public enum DataType0X45
